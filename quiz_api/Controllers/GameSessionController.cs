@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuizApi.Data;
 using QuizApi.Models;
@@ -7,6 +8,7 @@ namespace quiz_api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[EnableCors("AllowAnyOrigin")]
 public class GameSessionController : ControllerBase
 {
     private readonly QuizContext _context;
@@ -102,7 +104,10 @@ public class GameSessionController : ControllerBase
 
         if (!answer.IsCorrect)
         {
-            return BadRequest(question.IncorrectAnswerMessage);
+            return Ok(new {
+                IsCorrect = false,
+                Message = question.IncorrectAnswerMessage
+            });
         }
 
         session.AnsweredQuestionIds.Add(questionId);
@@ -115,18 +120,32 @@ public class GameSessionController : ControllerBase
                 // Вопросы закончились, игрок победил
                 session.IsCompleted = true;
                 await _context.SaveChangesAsync();
-                return Ok("Congratulations! You've completed the game.");
+                return Ok(new {
+                    IsCorrect = true,
+                    GoNextLevel = true,
+                    IsComplete = true,
+                });
             }
             else
             {
                 // Переход на следующий уровень
                 session.CurrentLevel++;
                 session.CurrentQuestionIds = nextQuestions;
+                await _context.SaveChangesAsync();
+                return Ok(new {
+                    IsCorrect = true,
+                    GoNextLevel = true,
+                    IsComplete = false
+                });
             }
         }
 
         await _context.SaveChangesAsync();
-        return Ok("Correct answer. Next question.");
+        return Ok(new {
+            IsCorrect = true,
+            GoNextLevel = false,
+            IsComplete = false
+        });
     }
 
     // POST: api/GameSession/end/{sessionId}

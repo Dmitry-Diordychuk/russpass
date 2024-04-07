@@ -83,13 +83,14 @@ public class QuestionsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteQuestion(int id)
     {
-        var question = await _context.Questions.FindAsync(id);
+        var question = await _context.Questions.Include(q => q.Answers).FirstOrDefaultAsync(q => q.Id == id);
         if (question == null)
         {
             return NotFound();
         }
 
-        _context.Questions.Remove(question);
+        _context.Answers.RemoveRange(question.Answers); // Удаление всех ответов, связанных с вопросом
+        _context.Questions.Remove(question); // Удаление вопроса
         await _context.SaveChangesAsync();
 
         return NoContent();

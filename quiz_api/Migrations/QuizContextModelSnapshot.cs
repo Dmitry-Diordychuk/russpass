@@ -37,7 +37,7 @@ namespace quiz_api.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Answer");
+                    b.ToTable("Answers");
                 });
 
             modelBuilder.Entity("QuizApi.Models.GameSession", b =>

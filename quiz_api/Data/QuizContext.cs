@@ -11,6 +11,6 @@ namespace QuizApi.Data
 
         public DbSet<Question> Questions { get; set; }
         public DbSet<GameSession> GameSessions { get; set; }
-        // Если вы добавите другие сущности, объявите их здесь
+        public DbSet<Answer> Answers { get; set; }
     }
 }
